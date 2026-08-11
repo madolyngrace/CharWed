@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wedding Planner</title>
+<link rel="apple-touch-icon" href="data:,">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Wedding Planner">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Karla:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg: #FBF6EC; --panel: #E7EDF8; --card: #FFFFFF; --cornflower: #7C9FD6;
+  --deep: #4A6FA8; --sand: #D9C7A0; --ink: #33415A; --mauve: #8892A6;
+  --line: #E4E1D2; --danger: #B23B33;
+}
+*{ box-sizing: border-box; }
+html,body{ margin:0; padding:0; }
+body{ background: var(--bg); color: var(--ink); font-family: 'Karla', sans-serif; min-height: 100vh; }
+input[type="checkbox"]{
+  appearance:none; -webkit-appearance:none; width:18px; height:18px;
+  border:2px solid var(--line); border-radius:50%; background:var(--card);
+  cursor:pointer; position:relative; flex-shrink:0; margin:0; vertical-align:middle;
+}
+input[type="checkbox"]:hover{ border-color: var(--cornflower); }
+input[type="checkbox"]:checked{ background: var(--cornflower); border-color: var(--cornflower); }
+input[type="checkbox"]:checked::after{
+  content:'✓'; position:absolute; top:50%; left:50%; transform:translate(-50%,-52%);
+  color:#fff; font-size:11px; font-weight:700; line-height:1;
+}
+.wrap{ max-width: 760px; margin: 0 auto; padding: 22px 16px 60px; }
+header{ text-align:center; margin-bottom: 0; }
+header h1{ font-family:'Cormorant Garamond', serif; font-size: 32px; font-weight:600; margin: 0 0 4px; color: var(--deep); }
+header p{ margin:0 0 14px; font-size: 13px; color: var(--mauve); }
+.scallop{
+  height: 14px; margin-bottom: 20px;
+  background-image: radial-gradient(circle at 10px 0, transparent 9px, var(--cornflower) 9.5px);
+  background-size: 20px 14px; background-repeat: repeat-x; background-position: center top;
+  opacity:.55;
+}
+
+.countdown-card{ background:var(--card); border-radius:16px; padding:18px; text-align:center; margin-bottom:20px; box-shadow: 0 2px 10px rgba(74,111,168,.12); }
+.countdown-card .l{ font-size:11.5px; color:var(--mauve); font-weight:600; letter-spacing:.03em; text-transform:uppercase; margin-bottom:6px; }
+.countdown-card input{ font-family:'Cormorant Garamond', serif; font-size:18px; text-align:center; border:none; background:none; color:var(--deep); font-weight:600; width:100%; }
+.countdown-days{ font-family:'Cormorant Garamond', serif; font-size:46px; font-weight:700; color:var(--cornflower); line-height:1; margin-top:4px; }
+.countdown-label{ font-size:12px; color:var(--mauve); font-weight:600; letter-spacing:.02em; margin-top:2px; }
+
+.tabs{ display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom: 16px; scrollbar-width:none; }
+.tabs::-webkit-scrollbar{ display:none; }
+.tab{ flex:0 0 auto; padding:8px 14px; border-radius:999px; background:var(--panel); color:var(--deep); font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap; }
+.tab.active{ background: var(--cornflower); color:#fff; }
+.page{ display:none; }
+.page.active{ display:block; }
+.section-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+.summary-row{ display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--mauve); margin-bottom:14px; }
+.summary-row b{ color:var(--ink); font-size:14px; }
+.pills{ display:flex; gap:6px; flex-wrap:wrap; }
+.pill{ padding:6px 12px; border-radius:999px; background:var(--panel); color:var(--deep); font-size:12px; font-weight:600; cursor:pointer; }
+.pill.active{ background:var(--cornflower); color:#fff; }
+.filter-select{ padding:7px 14px; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:12.5px; font-weight:600; font-family:inherit; cursor:pointer; }
+
+.tile{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; }
+.tile .l{ font-size:11.5px; color:var(--mauve); margin-bottom:4px; }
+.tile .v, .tile input{ font-size:20px; font-weight:700; color:var(--ink); border:none; background:none; width:100%; padding:0; font-family:inherit; }
+
+.grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap:14px; }
+.card{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; display:flex; flex-direction:column; position:relative; }
+.card-title{ font-family:'Cormorant Garamond', serif; font-weight:600; font-size:17px; margin-bottom:6px; }
+.card-row{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--mauve); margin-bottom:4px; }
+.card-row b{ color:var(--ink); }
+.card-note{ font-size:12px; color:var(--mauve); margin:4px 0 8px; line-height:1.4; }
+.card-actions{ display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:auto; padding-top:10px; flex-wrap:wrap; }
+.action-pill{ padding:4px 10px; border-radius:999px; font-size:10.5px; font-weight:600; color:var(--mauve); background:var(--panel); border:1px solid var(--line); cursor:pointer; white-space:nowrap; font-family:inherit; }
+.action-pill:hover{ color:var(--deep); border-color:var(--cornflower); }
+.action-pill.danger:hover{ color:var(--danger); border-color:var(--danger); }
+.ribbon{ position:absolute; top:10px; right:-4px; background:var(--cornflower); color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:6px 0 0 6px; letter-spacing:.04em; }
+.rsvp-row{ display:flex; gap:6px; margin-bottom:10px; }
+.rsvp-pill{ flex:1; text-align:center; padding:5px 8px; border-radius:999px; font-size:10.5px; font-weight:700; cursor:pointer; border:1px solid var(--line); color:var(--mauve); background:var(--card); }
+.rsvp-pill.active-yes{ background:#DDEAD8; color:#3E6B4A; border-color:#DDEAD8; }
+.rsvp-pill.active-no{ background:#F3DADA; color:var(--danger); border-color:#F3DADA; }
+.rsvp-pill.active-pending{ background:var(--panel); color:var(--deep); border-color:var(--panel); }
+
+.lights{ display:flex; gap:4px; margin: 8px 0 6px; }
+.bulb{ width:9px; height:12px; border-radius:50% 50% 45% 45%; background: var(--line); flex:1; max-width:14px; }
+.bulb.lit{ background: var(--cornflower); }
+
+.empty{ background:var(--card); border:1px dashed var(--line); border-radius:14px; padding:28px 16px; text-align:center; color:var(--mauve); font-size:13px; grid-column: 1/-1; }
+.empty b{ display:block; color:var(--ink); font-size:14.5px; margin-bottom:4px; }
+
+.todo-list{ display:flex; flex-direction:column; gap:10px; }
+.todo-item{ display:flex; align-items:flex-start; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:13px 14px; }
+.todo-item.done{ opacity:.6; }
+.todo-item.done .todo-title{ text-decoration:line-through; color:var(--mauve); }
+.todo-body{ flex:1; min-width:0; }
+.todo-title{ font-weight:600; font-size:14px; }
+.todo-date{ font-size:11px; color:var(--deep); font-weight:700; margin-bottom:2px; }
+.todo-date.overdue{ color: var(--danger); }
+.todo-note{ font-size:12.5px; color:var(--mauve); margin-top:3px; line-height:1.4; }
+.todo-actions{ display:flex; gap:8px; flex-shrink:0; }
+.complete-toggle{ margin-top:16px; }
+.complete-toggle .action-pill{ width:100%; text-align:left; padding:8px 12px; font-size:12px; }
+.complete-list{ margin-top:10px; }
+
+.btn{ padding:9px 16px; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; }
+.btn-primary{ background:var(--cornflower); color:#fff; border-color:var(--cornflower); }
+.overlay{ display:none; position:fixed; inset:0; background:rgba(51,65,90,.4); align-items:center; justify-content:center; padding:20px; z-index:50; overflow-y:auto; }
+.overlay.open{ display:flex; }
+.modal{ background:var(--card); border-radius:16px; padding:22px; max-width:400px; width:100%; max-height:88vh; overflow-y:auto; margin:auto; }
+.modal h2{ font-family:'Cormorant Garamond', serif; font-size:20px; margin:0 0 16px; color:var(--deep); }
+.field{ margin-bottom:12px; }
+.field label{ display:block; font-size:11.5px; color:var(--mauve); margin-bottom:4px; font-weight:600; }
+.field input, .field textarea, .field select{ width:100%; padding:9px 10px; border-radius:9px; border:1px solid var(--line); font-size:13px; font-family:inherit; background:var(--bg); color:var(--ink); }
+.field textarea{ resize:vertical; min-height:60px; }
+.row-2{ display:flex; gap:8px; }
+.row-2 > *{ flex:1; }
+.modal-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:6px; flex-wrap:wrap; }
+.check-row{ display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:500; cursor:pointer; }
+
+.guest-pool{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; }
+.guest-chip{ padding:7px 14px; border-radius:999px; background:var(--panel); color:var(--deep); font-size:12.5px; font-weight:600; cursor:pointer; border:2px solid transparent; }
+.guest-chip.selected{ border-color:var(--cornflower); background:#fff; box-shadow:0 0 0 1px var(--cornflower) inset; }
+.table-layout{ display:flex; gap:14px; align-items:stretch; }
+.head-of-table{ display:flex; gap:14px; justify-content:center; margin-bottom:0; }
+.head-seat{ background:var(--cornflower); color:#fff; border-radius:12px; padding:10px 20px; text-align:center; flex:1; }
+.head-label{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; opacity:.9; margin-bottom:5px; }
+.head-seat input{ background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.45); border-radius:8px; padding:6px 8px; color:#fff; font-size:13px; text-align:center; width:100%; font-family:inherit; }
+.head-seat input::placeholder{ color:rgba(255,255,255,.75); }
+.head-connector{ width:16px; height:10px; background:var(--sand); border-radius:0 0 6px 6px; margin:0 auto; }
+.table-side{ flex:1; display:flex; flex-direction:column; gap:6px; }
+.table-strip{ width:16px; background:var(--sand); border-radius:10px; flex-shrink:0; }
+.seat-row{ display:flex; align-items:center; gap:8px; }
+.seat-num{ font-size:10.5px; color:var(--mauve); font-weight:700; width:24px; flex-shrink:0; text-align:center; }
+.seat-slot{ flex:1; padding:8px 10px; border-radius:10px; font-size:12.5px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:6px; }
+.seat-slot.empty{ border:1.5px dashed var(--line); color:var(--mauve); background:transparent; }
+.seat-slot.filled{ background:var(--cornflower); color:#fff; font-weight:600; border:1.5px solid var(--cornflower); }
+.seat-slot.filled.selected{ background:var(--deep); border-color:var(--deep); }
+.seat-remove{ background:rgba(255,255,255,.3); border:none; color:#fff; border-radius:50%; width:16px; height:16px; font-size:10px; line-height:16px; cursor:pointer; flex-shrink:0; padding:0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🐚 Our Wedding Planner</h1>
+  </header>
+  <div class="scallop"></div>
+
+  <div class="countdown-card">
+    <div class="l">Wedding date</div>
+    <input type="date" id="weddingDateInput">
+    <div id="countdownDisplay"></div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-page="checklist">📋 Checklist</div>
+    <div class="tab" data-page="guests">💌 Guests</div>
+    <div class="tab" data-page="budget">💰 Budget</div>
+    <div class="tab" data-page="vendors">🤝 Vendors</div>
+    <div class="tab" data-page="seating">🪑 Seating</div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="page active" id="checklist-page">
+    <div class="section-head"><div></div><button class="btn btn-primary" id="addTaskBtn">+ Add task</button></div>
+    <div class="todo-list" id="taskList"></div>
+    <div class="complete-toggle" id="taskCompleteRow" style="display:none">
+      <button class="action-pill" id="taskCompleteToggle">▼ Done</button>
+      <div class="todo-list complete-list" id="taskCompleteList" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- GUESTS -->
+  <div class="page" id="guests-page">
+    <div class="section-head"><div></div><button class="btn btn-primary" id="addGuestBtn">+ Add guest</button></div>
+    <div class="summary-row" id="guestSummary"></div>
+    <div class="pills" id="guestFilters">
+      <div class="pill active" data-filter="all">All</div>
+      <div class="pill" data-filter="yes">Yes</div>
+      <div class="pill" data-filter="pending">Pending</div>
+      <div class="pill" data-filter="no">No</div>
+    </div>
+    <div class="grid" id="guestGrid" style="margin-top:14px"></div>
+  </div>
+
+  <!-- BUDGET -->
+  <div class="page" id="budget-page">
+    <div class="tile">
+      <div class="l">Total wedding budget</div>
+      <input type="number" id="budgetTotalInput" step="0.01" placeholder="0.00">
+      <div style="margin-top:10px;font-size:12.5px;color:var(--mauve)">Spent so far: <b id="totalSpentLabel" style="color:var(--ink)"></b> · Left: <b id="totalLeftLabel" style="color:var(--ink)"></b></div>
+    </div>
+    <div class="section-head" style="margin-top:0"><div></div><button class="btn btn-primary" id="addCatBtn">+ Add category</button></div>
+    <div class="grid" id="catGrid"></div>
+  </div>
+
+  <!-- VENDORS -->
+  <div class="page" id="vendors-page">
+    <div class="section-head"><div></div><button class="btn btn-primary" id="addVendorBtn">+ Add vendor</button></div>
+    <select class="filter-select" id="vendorCatFilter" style="margin-bottom:14px"><option value="all">All categories</option></select>
+    <div class="grid" id="vendorGrid"></div>
+  </div>
+
+  <!-- SEATING -->
+  <div class="page" id="seating-page">
+    <div class="section-head">
+      <div style="font-size:12.5px;color:var(--mauve);max-width:340px">Click a guest, then click a seat to place them. Click a seated guest to move them.</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:12px;color:var(--mauve);font-weight:600">Seats per side</label>
+        <input type="number" id="seatsPerSideInput" min="1" max="60" style="width:60px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);font-size:12px;text-align:center">
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:0">Unseated guests</div>
+    <div class="guest-pool" id="guestPool"></div>
+
+    <div class="section-label">The table</div>
+    <div class="head-of-table">
+      <div class="head-seat">
+        <div class="head-label">👰 Bride</div>
+        <input type="text" id="brideNameInput" placeholder="Name">
+      </div>
+      <div class="head-seat">
+        <div class="head-label">🤵 Groom</div>
+        <input type="text" id="groomNameInput" placeholder="Name">
+      </div>
+    </div>
+    <div class="head-connector"></div>
+    <div class="table-layout">
+      <div class="table-side" id="sideA"></div>
+      <div class="table-strip"></div>
+      <div class="table-side" id="sideB"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TASK MODAL -->
+<div class="overlay" id="taskModal"><div class="modal">
+  <h2 id="taskModalTitle">New task</h2>
+  <div class="field"><label>Title</label><input type="text" id="taskTitle"></div>
+  <div class="field"><label>Due date (optional)</label><input type="date" id="taskDate"></div>
+  <div class="field"><label>Notes (optional)</label><textarea id="taskNote"></textarea></div>
+  <div class="modal-actions">
+    <button class="btn" id="deleteTaskBtn" style="display:none;color:var(--danger);border-color:var(--danger)">Delete</button>
+    <button class="btn" id="cancelTaskBtn">Cancel</button>
+    <button class="btn btn-primary" id="saveTaskBtn">Save</button>
+  </div>
+</div></div>
+
+<!-- GUEST MODAL -->
+<div class="overlay" id="guestModal"><div class="modal">
+  <h2 id="guestModalTitle">New guest</h2>
+  <div class="field"><label>Name</label><input type="text" id="guestName"></div>
+  <div class="field"><label>Group (optional)</label><input type="text" id="guestGroup" placeholder="Bride's family, work friends..."></div>
+  <div class="field"><label class="check-row"><input type="checkbox" id="guestPlusOne"> Bringing a plus-one</label></div>
+  <div class="field"><label>Notes (optional)</label><textarea id="guestNotes" placeholder="Meal choice, allergies..."></textarea></div>
+  <div class="modal-actions">
+    <button class="btn" id="deleteGuestBtn" style="display:none;color:var(--danger);border-color:var(--danger)">Delete</button>
+    <button class="btn" id="cancelGuestBtn">Cancel</button>
+    <button class="btn btn-primary" id="saveGuestBtn">Save</button>
+  </div>
+</div></div>
+
+<!-- CATEGORY MODAL -->
+<div class="overlay" id="catModal"><div class="modal">
+  <h2 id="catModalTitle">New category</h2>
+  <div class="field"><label>Category name</label><input type="text" id="catName" placeholder="Venue, flowers, catering..."></div>
+  <div class="field"><label>Emoji (optional)</label><input type="text" id="catEmoji" maxlength="4" placeholder="💐"></div>
+  <div class="field"><label>Budgeted amount</label><input type="number" id="catAmount" min="0" step="0.01" placeholder="0.00"></div>
+  <div class="modal-actions">
+    <button class="btn" id="deleteCatBtn" style="display:none;color:var(--danger);border-color:var(--danger)">Delete</button>
+    <button class="btn" id="cancelCatBtn">Cancel</button>
+    <button class="btn btn-primary" id="saveCatBtn">Save</button>
+  </div>
+</div></div>
+
+<!-- EXPENSE MODAL -->
+<div class="overlay" id="expenseModal"><div class="modal">
+  <h2>Log an expense</h2>
+  <div class="field"><label>What was it?</label><input type="text" id="expenseName"></div>
+  <div class="field"><label>Amount</label><input type="number" id="expenseAmount" min="0" step="0.01" placeholder="0.00"></div>
+  <div class="modal-actions"><button class="btn" id="cancelExpenseBtn">Cancel</button><button class="btn btn-primary" id="saveExpenseBtn">Log it</button></div>
+</div></div>
+
+<!-- VENDOR MODAL -->
+<div class="overlay" id="vendorModal"><div class="modal">
+  <h2 id="vendorModalTitle">New vendor</h2>
+  <div class="field"><label>Name</label><input type="text" id="vendorName"></div>
+  <div class="row-2">
+    <div class="field"><label>Category</label><input type="text" id="vendorCategory" placeholder="Venue, florist, photographer..."></div>
+    <div class="field"><label>Price</label><input type="text" id="vendorPrice" placeholder="$0.00"></div>
+  </div>
+  <div class="field"><label>Contact (optional)</label><input type="text" id="vendorContact" placeholder="Email, phone, or website"></div>
+  <div class="field"><label class="check-row"><input type="checkbox" id="vendorDeposit"> Deposit paid</label></div>
+  <div class="field"><label>Notes (optional)</label><textarea id="vendorNotes"></textarea></div>
+  <div class="modal-actions">
+    <button class="btn" id="deleteVendorBtn" style="display:none;color:var(--danger);border-color:var(--danger)">Delete</button>
+    <button class="btn" id="cancelVendorBtn">Cancel</button>
+    <button class="btn btn-primary" id="saveVendorBtn">Save</button>
+  </div>
+</div></div>
+
+<script>
+const STORAGE_KEY = 'wedding_planner_data';
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+let weddingDate = '', tasks=[], guests=[], budgetTotal=0, categories=[], vendors=[];
+let seatsPerSide = 20, sideA = [], sideB = [], brideName = '', groomName = '';
+
+function defaultState(){
+  return { weddingDate:'', tasks:[], guests:[], budgetTotal:0, categories:[], vendors:[], seatsPerSide:20, sideA:[], sideB:[], brideName:'', groomName:'' };
+}
+function resizeSeats(n){
+  seatsPerSide = n;
+  sideA = Array.from({length:n}, (_,i)=> sideA[i] || null);
+  sideB = Array.from({length:n}, (_,i)=> sideB[i] || null);
+}
+function loadAll(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const data = raw ? JSON.parse(raw) : defaultState();
+    weddingDate = data.weddingDate||''; tasks = data.tasks||[]; guests = data.guests||[];
+    budgetTotal = data.budgetTotal||0; categories = data.categories||[]; vendors = data.vendors||[];
+    seatsPerSide = data.seatsPerSide || 20; sideA = data.sideA || []; sideB = data.sideB || [];
+    brideName = data.brideName || ''; groomName = data.groomName || '';
+    resizeSeats(seatsPerSide);
+  }catch(e){
+    const d = defaultState();
+    weddingDate=d.weddingDate; tasks=d.tasks; guests=d.guests; budgetTotal=d.budgetTotal; categories=d.categories; vendors=d.vendors;
+    seatsPerSide=d.seatsPerSide; sideA=d.sideA; sideB=d.sideB; brideName=d.brideName; groomName=d.groomName;
+  }
+}
+async function saveAll(){
+  const data = { weddingDate, tasks, guests, budgetTotal, categories, vendors, seatsPerSide, sideA, sideB, brideName, groomName };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+function renderAll(){
+  renderCountdown(); renderTasks(); renderGuests(); renderBudget(); renderVendors(); renderSeating();
+}
+
+/* ---------- TABS ---------- */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.page+'-page').classList.add('active');
+  };
+});
+
+/* ---------- COUNTDOWN ---------- */
+document.getElementById('weddingDateInput').onchange = async (e) => { weddingDate = e.target.value; await saveAll(); renderCountdown(); };
+function renderCountdown(){
+  document.getElementById('weddingDateInput').value = weddingDate;
+  const el = document.getElementById('countdownDisplay');
+  if(!weddingDate){ el.innerHTML = ''; return; }
+  const today = new Date().toISOString().slice(0,10);
+  const target = new Date(weddingDate+'T00:00:00');
+  const now = new Date();
+  if(weddingDate === today){ el.innerHTML = `<div class="countdown-days">💍</div><div class="countdown-label">Today's the day!</div>`; return; }
+  if(weddingDate < today){ el.innerHTML = `<div class="countdown-label">Married since ${weddingDate}! 🎉</div>`; return; }
+  const days = Math.ceil((target - now) / 86400000);
+  el.innerHTML = `<div class="countdown-days">${days}</div><div class="countdown-label">day${days===1?'':'s'} to go</div>`;
+}
+
+/* ---------- CHECKLIST (to-do pattern) ---------- */
+let taskCompleteOpen = false;
+function todoItemHtml(t, editFn, toggleFn, dateLine){
+  const today = new Date().toISOString().slice(0,10);
+  const overdue = t.dueDate && t.dueDate < today && !t.done;
+  return `<div class="todo-item ${t.done?'done':''}">
+    <input type="checkbox" ${t.done?'checked':''} onchange="${toggleFn}('${t.id}')">
+    <div class="todo-body">
+      ${dateLine ? `<div class="todo-date ${overdue?'overdue':''}">${dateLine}${overdue?' (overdue)':''}</div>` : ''}
+      <div class="todo-title">${t.title}</div>
+      ${t.note?`<div class="todo-note">${t.note}</div>`:''}
+    </div>
+    <div class="todo-actions"><button class="action-pill" onclick="${editFn}('${t.id}')">Edit</button></div>
+  </div>`;
+}
+function renderTasks(){
+  const active = tasks.filter(t=>!t.done), done = tasks.filter(t=>t.done);
+  const sortedActive = active.slice().sort((a,b)=>(a.dueDate||'9999')<(b.dueDate||'9999')?-1:1);
+  const listEl = document.getElementById('taskList');
+  listEl.innerHTML = !active.length && !done.length
+    ? `<div class="empty"><b>No tasks yet</b>Add your first to-do for the big day.</div>`
+    : (sortedActive.length ? sortedActive.map(t=>todoItemHtml(t,'editTask','toggleTask', t.dueDate)).join('') : `<div class="empty" style="padding:24px 16px"><b>All done! 🐚</b></div>`);
+  const row = document.getElementById('taskCompleteRow'), list = document.getElementById('taskCompleteList');
+  row.style.display = done.length ? 'block':'none';
+  document.getElementById('taskCompleteToggle').textContent = (taskCompleteOpen?'▲':'▼')+' Done ('+done.length+')';
+  list.style.display = (taskCompleteOpen && done.length) ? 'block':'none';
+  list.innerHTML = done.map(t=>todoItemHtml(t,'editTask','toggleTask', t.dueDate)).join('');
+}
+document.getElementById('taskCompleteToggle').onclick = ()=>{ taskCompleteOpen=!taskCompleteOpen; renderTasks(); };
+window.toggleTask = async (id)=>{ const t=tasks.find(x=>x.id===id); t.done=!t.done; await saveAll(); renderTasks(); };
+const taskModal = document.getElementById('taskModal');
+let editingTaskId = null;
+document.getElementById('addTaskBtn').onclick = () => {
+  editingTaskId=null;
+  document.getElementById('taskModalTitle').textContent='New task';
+  document.getElementById('taskTitle').value=''; document.getElementById('taskDate').value=''; document.getElementById('taskNote').value='';
+  document.getElementById('deleteTaskBtn').style.display='none';
+  taskModal.classList.add('open');
+};
+window.editTask = (id) => {
+  const t = tasks.find(x=>x.id===id); if(!t) return;
+  editingTaskId=id;
+  document.getElementById('taskModalTitle').textContent='Edit task';
+  document.getElementById('taskTitle').value=t.title; document.getElementById('taskDate').value=t.dueDate||''; document.getElementById('taskNote').value=t.note||'';
+  document.getElementById('deleteTaskBtn').style.display='inline-block';
+  taskModal.classList.add('open');
+};
+document.getElementById('cancelTaskBtn').onclick = ()=>taskModal.classList.remove('open');
+document.getElementById('deleteTaskBtn').onclick = async ()=>{
+  if(!editingTaskId) return;
+  tasks = tasks.filter(x=>x.id!==editingTaskId);
+  await saveAll(); taskModal.classList.remove('open'); renderTasks();
+};
+document.getElementById('saveTaskBtn').onclick = async () => {
+  const title = document.getElementById('taskTitle').value.trim(); if(!title) return;
+  const dueDate = document.getElementById('taskDate').value;
+  const note = document.getElementById('taskNote').value.trim();
+  if(editingTaskId){ const t=tasks.find(x=>x.id===editingTaskId); t.title=title; t.dueDate=dueDate; t.note=note; }
+  else{ tasks.push({ id: uid(), title, dueDate, note, done:false }); }
+  await saveAll(); taskModal.classList.remove('open'); renderTasks();
+};
+
+/* ---------- GUESTS ---------- */
+let guestFilter = 'all';
+document.getElementById('guestFilters').addEventListener('click', e=>{
+  if(!e.target.classList.contains('pill')) return;
+  document.querySelectorAll('#guestFilters .pill').forEach(p=>p.classList.remove('active'));
+  e.target.classList.add('active'); guestFilter = e.target.dataset.filter; renderGuests();
+});
+function renderGuests(){
+  const total = guests.length;
+  const yes = guests.filter(g=>g.rsvp==='yes').length;
+  const no = guests.filter(g=>g.rsvp==='no').length;
+  const pending = guests.filter(g=>g.rsvp==='pending').length;
+  const plusOnes = guests.filter(g=>g.rsvp==='yes' && g.plusOne).length;
+  document.getElementById('guestSummary').innerHTML = `<span><b>${total}</b> invited</span><span><b>${yes}</b> yes</span><span><b>${pending}</b> pending</span><span><b>${no}</b> no</span><span><b>${plusOnes}</b> plus-ones</span>`;
+
+  const grid = document.getElementById('guestGrid');
+  let list = guests.slice();
+  if(guestFilter!=='all') list = list.filter(g=>g.rsvp===guestFilter);
+  if(!list.length){ grid.innerHTML = `<div class="empty"><b>No guests yet</b>Tap "Add guest" to start your list.</div>`; return; }
+  grid.innerHTML = list.map(g=>`
+    <div class="card">
+      <div class="card-title">${g.name}</div>
+      ${g.group?`<div class="card-row"><span>Group</span><b>${g.group}</b></div>`:''}
+      <div class="rsvp-row">
+        <div class="rsvp-pill ${g.rsvp==='yes'?'active-yes':''}" onclick="setRsvp('${g.id}','yes')">Yes</div>
+        <div class="rsvp-pill ${g.rsvp==='pending'?'active-pending':''}" onclick="setRsvp('${g.id}','pending')">Pending</div>
+        <div class="rsvp-pill ${g.rsvp==='no'?'active-no':''}" onclick="setRsvp('${g.id}','no')">No</div>
+      </div>
+      ${g.plusOne?'<div class="card-row"><span>Plus-one</span><b>Yes</b></div>':''}
+      ${g.notes?`<div class="card-note">${g.notes}</div>`:''}
+      <div class="card-actions"><div></div><button class="action-pill" onclick="editGuest('${g.id}')">Edit</button></div>
+    </div>`).join('');
+}
+window.setRsvp = async (id, val) => { const g=guests.find(x=>x.id===id); g.rsvp=val; await saveAll(); renderGuests(); };
+const guestModal = document.getElementById('guestModal');
+let editingGuestId = null;
+document.getElementById('addGuestBtn').onclick = () => {
+  editingGuestId=null;
+  document.getElementById('guestModalTitle').textContent='New guest';
+  document.getElementById('guestName').value=''; document.getElementById('guestGroup').value='';
+  document.getElementById('guestPlusOne').checked=false; document.getElementById('guestNotes').value='';
+  document.getElementById('deleteGuestBtn').style.display='none';
+  guestModal.classList.add('open');
+};
+window.editGuest = (id) => {
+  const g = guests.find(x=>x.id===id); if(!g) return;
+  editingGuestId=id;
+  document.getElementById('guestModalTitle').textContent='Edit guest';
+  document.getElementById('guestName').value=g.name; document.getElementById('guestGroup').value=g.group||'';
+  document.getElementById('guestPlusOne').checked=!!g.plusOne; document.getElementById('guestNotes').value=g.notes||'';
+  document.getElementById('deleteGuestBtn').style.display='inline-block';
+  guestModal.classList.add('open');
+};
+document.getElementById('cancelGuestBtn').onclick = ()=>guestModal.classList.remove('open');
+document.getElementById('deleteGuestBtn').onclick = async ()=>{
+  if(!editingGuestId) return;
+  guests = guests.filter(x=>x.id!==editingGuestId);
+  await saveAll(); guestModal.classList.remove('open'); renderGuests();
+};
+document.getElementById('saveGuestBtn').onclick = async () => {
+  const name = document.getElementById('guestName').value.trim(); if(!name) return;
+  const fields = { name, group: document.getElementById('guestGroup').value.trim(), plusOne: document.getElementById('guestPlusOne').checked, notes: document.getElementById('guestNotes').value.trim() };
+  if(editingGuestId){ Object.assign(guests.find(x=>x.id===editingGuestId), fields); }
+  else{ guests.push({ id: uid(), ...fields, rsvp:'pending' }); }
+  await saveAll(); guestModal.classList.remove('open'); renderGuests();
+};
+
+/* ---------- BUDGET (category + expense log pattern) ---------- */
+document.getElementById('budgetTotalInput').oninput = async (e)=>{ budgetTotal = Number(e.target.value)||0; await saveAll(); renderBudget(); };
+function catSpent(c){ return (c.purchases||[]).reduce((s,p)=>s+p.amount,0); }
+function totalSpent(){ return categories.reduce((s,c)=>s+catSpent(c),0); }
+function renderBudget(){
+  document.getElementById('budgetTotalInput').value = budgetTotal || '';
+  const spent = totalSpent();
+  document.getElementById('totalSpentLabel').textContent = '$'+spent.toFixed(2);
+  document.getElementById('totalLeftLabel').textContent = '$'+(budgetTotal-spent).toFixed(2);
+  const grid = document.getElementById('catGrid');
+  if(!categories.length){ grid.innerHTML = `<div class="empty"><b>No categories yet</b>Tap "Add category" to start budgeting.</div>`; return; }
+  const sorted = categories.slice().sort((a,b)=>{
+    const aZero=a.amount<=0, bZero=b.amount<=0;
+    if(aZero!==bZero) return aZero?1:-1;
+    return catSpent(b)-catSpent(a);
+  });
+  grid.innerHTML = sorted.map(c=>{
+    const s = catSpent(c);
+    const pct = c.amount>0 ? Math.min(100, Math.round(s/c.amount*100)) : 0;
+    const lit = Math.round(pct/10);
+    const bulbs = Array.from({length:10}, (_,i)=>`<div class="bulb${i<lit?' lit':''}"></div>`).join('');
+    const over = s > c.amount;
+    return `<div class="card">
+      <div class="card-title">${c.emoji||'💐'} ${c.name}</div>
+      <div class="card-row"><span>Spent</span><b>$${s.toFixed(2)} of $${c.amount.toFixed(2)}</b></div>
+      <div class="lights">${bulbs}</div>
+      <div class="card-row" style="margin-bottom:10px"><span></span><b style="color:${over?'var(--danger)':'var(--ink)'}">${over?`$${(s-c.amount).toFixed(2)} over`:`$${(c.amount-s).toFixed(2)} left`}</b></div>
+      <div class="card-actions">
+        <button class="action-pill" onclick="openExpenseModal('${c.id}')">+ Log expense</button>
+        <button class="action-pill" onclick="editCat('${c.id}')">Edit</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+const catModal = document.getElementById('catModal');
+let editingCatId = null;
+document.getElementById('addCatBtn').onclick = () => {
+  editingCatId=null;
+  document.getElementById('catModalTitle').textContent='New category';
+  document.getElementById('catName').value=''; document.getElementById('catEmoji').value=''; document.getElementById('catAmount').value='';
+  document.getElementById('deleteCatBtn').style.display='none';
+  catModal.classList.add('open');
+};
+window.editCat = (id) => {
+  const c = categories.find(x=>x.id===id); if(!c) return;
+  editingCatId=id;
+  document.getElementById('catModalTitle').textContent='Edit category';
+  document.getElementById('catName').value=c.name; document.getElementById('catEmoji').value=c.emoji||''; document.getElementById('catAmount').value=c.amount;
+  document.getElementById('deleteCatBtn').style.display='inline-block';
+  catModal.classList.add('open');
+};
+document.getElementById('cancelCatBtn').onclick = ()=>catModal.classList.remove('open');
+document.getElementById('deleteCatBtn').onclick = async ()=>{
+  if(!editingCatId) return;
+  categories = categories.filter(x=>x.id!==editingCatId);
+  await saveAll(); catModal.classList.remove('open'); renderBudget();
+};
+document.getElementById('saveCatBtn').onclick = async () => {
+  const name = document.getElementById('catName').value.trim(); if(!name) return;
+  const fields = { name, emoji: document.getElementById('catEmoji').value.trim()||'💐', amount: Number(document.getElementById('catAmount').value)||0 };
+  if(editingCatId){ Object.assign(categories.find(x=>x.id===editingCatId), fields); }
+  else{ categories.push({ id: uid(), ...fields, purchases: [] }); }
+  await saveAll(); catModal.classList.remove('open'); renderBudget();
+};
+const expenseModal = document.getElementById('expenseModal');
+let expenseCatId = null;
+window.openExpenseModal = (catId) => {
+  expenseCatId = catId;
+  document.getElementById('expenseName').value=''; document.getElementById('expenseAmount').value='';
+  expenseModal.classList.add('open');
+};
+document.getElementById('cancelExpenseBtn').onclick = ()=>expenseModal.classList.remove('open');
+document.getElementById('saveExpenseBtn').onclick = async () => {
+  const amt = Number(document.getElementById('expenseAmount').value)||0;
+  if(amt<=0 || !expenseCatId) return;
+  const name = document.getElementById('expenseName').value.trim() || 'Expense';
+  const c = categories.find(x=>x.id===expenseCatId);
+  c.purchases = c.purchases||[]; c.purchases.push({name, amount:amt});
+  await saveAll(); expenseModal.classList.remove('open'); renderBudget();
+};
+
+/* ---------- VENDORS ---------- */
+let vendorCatFilter = 'all';
+document.getElementById('vendorCatFilter').onchange = (e)=>{ vendorCatFilter = e.target.value; renderVendors(); };
+function populateVendorCatFilter(){
+  const sel = document.getElementById('vendorCatFilter');
+  const cats = Array.from(new Set(vendors.map(v=>v.category).filter(Boolean))).sort();
+  if(!cats.includes(vendorCatFilter)) vendorCatFilter = 'all';
+  sel.innerHTML = '<option value="all">All categories</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  sel.value = vendorCatFilter;
+}
+function renderVendors(){
+  populateVendorCatFilter();
+  const grid = document.getElementById('vendorGrid');
+  let list = vendors.slice();
+  if(vendorCatFilter!=='all') list = list.filter(v=>v.category===vendorCatFilter);
+  if(!list.length){ grid.innerHTML = `<div class="empty"><b>No vendors yet</b>Tap "Add vendor" to start tracking one.</div>`; return; }
+  grid.innerHTML = list.map(v=>`
+    <div class="card">
+      ${v.depositPaid?'<div class="ribbon">DEPOSIT PAID</div>':''}
+      <div class="card-title">${v.name}</div>
+      ${v.category?`<div class="card-row"><span>Category</span><b>${v.category}</b></div>`:''}
+      ${v.price?`<div class="card-row"><span>Price</span><b>${v.price}</b></div>`:''}
+      ${v.contact?`<div class="card-row"><span>Contact</span><b>${v.contact}</b></div>`:''}
+      ${v.notes?`<div class="card-note">${v.notes}</div>`:''}
+      <div class="card-actions"><div></div><button class="action-pill" onclick="editVendor('${v.id}')">Edit</button></div>
+    </div>`).join('');
+}
+const vendorModal = document.getElementById('vendorModal');
+let editingVendorId = null;
+document.getElementById('addVendorBtn').onclick = () => {
+  editingVendorId=null;
+  document.getElementById('vendorModalTitle').textContent='New vendor';
+  document.getElementById('vendorName').value=''; document.getElementById('vendorCategory').value=''; document.getElementById('vendorPrice').value='';
+  document.getElementById('vendorContact').value=''; document.getElementById('vendorDeposit').checked=false; document.getElementById('vendorNotes').value='';
+  document.getElementById('deleteVendorBtn').style.display='none';
+  vendorModal.classList.add('open');
+};
+window.editVendor = (id) => {
+  const v = vendors.find(x=>x.id===id); if(!v) return;
+  editingVendorId=id;
+  document.getElementById('vendorModalTitle').textContent='Edit vendor';
+  document.getElementById('vendorName').value=v.name; document.getElementById('vendorCategory').value=v.category||'';
+  document.getElementById('vendorPrice').value=v.price||''; document.getElementById('vendorContact').value=v.contact||'';
+  document.getElementById('vendorDeposit').checked=!!v.depositPaid; document.getElementById('vendorNotes').value=v.notes||'';
+  document.getElementById('deleteVendorBtn').style.display='inline-block';
+  vendorModal.classList.add('open');
+};
+document.getElementById('cancelVendorBtn').onclick = ()=>vendorModal.classList.remove('open');
+document.getElementById('deleteVendorBtn').onclick = async ()=>{
+  if(!editingVendorId) return;
+  vendors = vendors.filter(x=>x.id!==editingVendorId);
+  await saveAll(); vendorModal.classList.remove('open'); renderVendors();
+};
+document.getElementById('saveVendorBtn').onclick = async () => {
+  const name = document.getElementById('vendorName').value.trim(); if(!name) return;
+  const fields = {
+    name, category: document.getElementById('vendorCategory').value.trim(),
+    price: document.getElementById('vendorPrice').value.trim(), contact: document.getElementById('vendorContact').value.trim(),
+    depositPaid: document.getElementById('vendorDeposit').checked, notes: document.getElementById('vendorNotes').value.trim()
+  };
+  if(editingVendorId){ Object.assign(vendors.find(x=>x.id===editingVendorId), fields); }
+  else{ vendors.push({ id: uid(), ...fields }); }
+  await saveAll(); vendorModal.classList.remove('open'); renderVendors();
+};
+
+/* ---------- SEATING ---------- */
+let selectedGuestId = null;
+document.getElementById('brideNameInput').oninput = async (e) => { brideName = e.target.value; await saveAll(); };
+document.getElementById('groomNameInput').oninput = async (e) => { groomName = e.target.value; await saveAll(); };
+document.getElementById('seatsPerSideInput').onchange = async (e) => {
+  let n = Number(e.target.value)||20;
+  n = Math.max(1, Math.min(60, n));
+  resizeSeats(n);
+  await saveAll(); renderSeating();
+};
+function renderSeating(){
+  document.getElementById('seatsPerSideInput').value = seatsPerSide;
+  document.getElementById('brideNameInput').value = brideName;
+  document.getElementById('groomNameInput').value = groomName;
+  const seatedIds = new Set([...sideA, ...sideB].filter(Boolean));
+  const pool = guests.filter(g=>g.rsvp!=='no' && !seatedIds.has(g.id));
+  const poolEl = document.getElementById('guestPool');
+  poolEl.innerHTML = pool.length
+    ? pool.map(g=>`<div class="guest-chip ${selectedGuestId===g.id?'selected':''}" onclick="selectGuestForSeat('${g.id}')">${g.name}</div>`).join('')
+    : `<div style="font-size:12.5px;color:var(--mauve)">Everyone's seated! 🎉</div>`;
+  renderSide('sideA', sideA, 'A');
+  renderSide('sideB', sideB, 'B');
+}
+function renderSide(elId, arr, label){
+  const el = document.getElementById(elId);
+  el.innerHTML = arr.map((gid,i)=>{
+    const g = gid ? guests.find(x=>x.id===gid) : null;
+    if(g){
+      return `<div class="seat-row"><span class="seat-num">${label}${i+1}</span><div class="seat-slot filled ${selectedGuestId===g.id?'selected':''}" onclick="seatClicked('${label}',${i})">${g.name}<button class="seat-remove" onclick="event.stopPropagation();unseatGuest('${label}',${i})">✕</button></div></div>`;
+    }
+    return `<div class="seat-row"><span class="seat-num">${label}${i+1}</span><div class="seat-slot empty" onclick="seatClicked('${label}',${i})">Empty</div></div>`;
+  }).join('');
+}
+window.selectGuestForSeat = (id) => { selectedGuestId = (selectedGuestId===id) ? null : id; renderSeating(); };
+window.seatClicked = async (side, idx) => {
+  const arr = side==='A' ? sideA : sideB;
+  const occupantId = arr[idx];
+  if(!selectedGuestId){
+    if(occupantId){ selectedGuestId = occupantId; renderSeating(); }
+    return;
+  }
+  if(occupantId === selectedGuestId){ selectedGuestId = null; renderSeating(); return; }
+  const clearFrom = (list)=>{ const i=list.indexOf(selectedGuestId); if(i>-1) list[i]=null; };
+  clearFrom(sideA); clearFrom(sideB);
+  arr[idx] = selectedGuestId;
+  selectedGuestId = null;
+  await saveAll(); renderSeating();
+};
+window.unseatGuest = async (side, idx) => {
+  const arr = side==='A' ? sideA : sideB;
+  arr[idx] = null;
+  await saveAll(); renderSeating();
+};
+
+/* ---------- INIT ---------- */
+loadAll();
+renderAll();
+</script>
+</body>
+</html>
